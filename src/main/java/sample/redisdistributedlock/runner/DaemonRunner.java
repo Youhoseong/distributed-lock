@@ -9,7 +9,6 @@ import org.springframework.boot.CommandLineRunner;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StopWatch;
-
 import java.util.concurrent.TimeUnit;
 import java.util.stream.IntStream;
 
@@ -22,14 +21,25 @@ public class DaemonRunner implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        StopWatch stopWatch = new StopWatch();
+        stopWatch.start();
         redisTemplate.opsForValue().set("stock", String.valueOf(1000));
-
         IntStream.rangeClosed(1, 5)
                 .mapToObj(it -> new Thread(doCompetition(String.valueOf(it)), "Stock-".concat(String.valueOf(it))))
-                .forEach(Thread::start);
+                .map(tr -> {
+                    tr.start();
+                    return tr;
+                })
+                .forEach(this::join);
 
+        stopWatch.stop();
+        log.info("[DR::run] Threadname {}, All task done !! runtime={}ms", Thread.currentThread().getName(), stopWatch.getTotalTimeMillis());
     }
 
+    @SneakyThrows(InterruptedException.class)
+    private void join(Thread thread) {
+        thread.join();
+    }
 
     private Runnable doCompetition(String key) {
         return () -> {
@@ -44,7 +54,7 @@ public class DaemonRunner implements CommandLineRunner {
                         redisTemplate.opsForValue()
                                 .set("stock", String.valueOf(Integer.valueOf(stock) - 1));
 
-                        log.info("[DR::doCompetition] Current stock {}, After Stock {} !! {}", stock, Integer.valueOf(stock)-1);
+                        log.info("[DR::doCompetition] Current stock {}, After Stock {} !!", stock, Integer.valueOf(stock)-1);
                         lock.unlock();
                     }
                 } catch (Throwable t) {
@@ -53,7 +63,7 @@ public class DaemonRunner implements CommandLineRunner {
             }
 
             stopWatch.stop();
-            log.info("[DR::doCompetition] Threadname {}, Task time={}ms", "Stock-".concat(key), stopWatch.getTotalTimeMillis());
+            log.info("[DR::doCompetition] Threadname {} All task done, runtime={}ms", Thread.currentThread().getName(), stopWatch.getTotalTimeMillis());
 
         };
     }
