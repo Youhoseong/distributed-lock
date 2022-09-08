@@ -1,0 +1,8 @@
+
+spring:
+  config:
+    activate:
+      on-profile: local
+  redis:
+    host: ec2-3-38-22-68.ap-northeast-2.compute.amazonaws.com
+    port: 6379
