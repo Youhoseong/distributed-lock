@@ -15,7 +15,7 @@ import java.util.stream.IntStream;
 @Component
 @Slf4j
 @RequiredArgsConstructor
-public class DaemonRunner implements CommandLineRunner {
+public class SetnxLockRunner implements CommandLineRunner {
     private final RedisTemplate<String, String> redisTemplate;
     private final RedissonClient redissonClient;
 

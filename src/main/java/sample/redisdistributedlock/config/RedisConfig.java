@@ -1,5 +1,6 @@
 package sample.redisdistributedlock.config;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.data.redis.connection.RedisConnectionFactory;
@@ -22,5 +23,24 @@ public class RedisConfig {
 
         return redisTemplate;
     }
+
+    @Bean
+    @Qualifier("txRedisTemplate")
+    public RedisTemplate<String, ?> transactionableRedisTemplate(RedisConnectionFactory redisConnectionFactory) {
+        RedisTemplate<String, ?> redisTemplate = new RedisTemplate<>();
+        redisTemplate.setConnectionFactory(redisConnectionFactory);
+
+        StringRedisSerializer serializer = new StringRedisSerializer();
+        redisTemplate.setKeySerializer(serializer);
+        redisTemplate.setValueSerializer(serializer);
+        redisTemplate.setHashKeySerializer(serializer);
+        redisTemplate.setHashValueSerializer(serializer);
+
+        redisTemplate.setEnableTransactionSupport(true);
+
+        return redisTemplate;
+    }
+
+
 
 }
