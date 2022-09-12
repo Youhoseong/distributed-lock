@@ -24,6 +24,8 @@ repositories {
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
 	implementation 'org.redisson:redisson-spring-boot-starter:3.17.6'
+
+	implementation 'mysql:mysql-connector-java'
 	if (osdetector.arch.equals("aarch_64")) {
 		implementation("io.netty:netty-all")
 	}

@@ -14,15 +14,17 @@ import org.springframework.transaction.annotation.Transactional;
 public class StockService {
 
     @Qualifier("txRedisTemplate")
-    private final RedisTemplate redisTemplate;
+    private final RedisTemplate txRedisTemplate;
 
+    //@Transactional
     public void supplyStock() {
-        String value = (String) redisTemplate.opsForValue()
-                .get("tx-stock");
+        String key = "stock";
+        String value = (String) txRedisTemplate.opsForValue()
+                .get(key);
 
         if(value != null) {
-            redisTemplate.opsForValue().set("tx-stock", String.valueOf(Integer.parseInt(value) + 1));
-            log.info("[SS::supplyStock] Current stock {}, After Stock {} !!", value, Integer.valueOf(value)+1);
+            txRedisTemplate.opsForValue().set("stock", String.valueOf(Integer.parseInt(value) + 1));
+            log.info("[SS::supplyStock] Current stock {}, After Stock {} !!", value, txRedisTemplate.opsForValue().get("stock"));
         }
     }
 }
